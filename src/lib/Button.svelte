@@ -1,6 +1,7 @@
 <script lang="ts">
     export let variant: 'filled' | 'outlined' = 'filled'
     export let disabled: boolean = false
+    export let onSubmit: () => void
 </script>
 
 {#if variant === 'filled'}
@@ -14,6 +15,7 @@
     <button
         class="button button--outlined"
         disabled={disabled}
+        on:submit={onSubmit}
     >
         <slot />
     </button>
