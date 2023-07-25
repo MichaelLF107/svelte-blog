@@ -11,6 +11,10 @@
 
     let enabled = false
 
+    let passwordError = false
+
+    let success = false
+
     function verifyFormComplete() {
         if (form.name !== '' && form.email !== '' && form.password !== '' && form.confirmPassword !== '') {
             enabled = true
@@ -18,11 +22,39 @@
             enabled = false
         }
     }
+
+    function verifyPassword() {
+        if(form.password !== '' && form.confirmPassword !== '') {
+            if (form.password !== form.confirmPassword) {
+                passwordError = true
+            } else {
+                passwordError = false
+                verifyFormComplete()
+            }
+        }
+    }
+
+    async function handleRegister() {
+        const response = await fetch('http://localhost:3333/new-user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(form)
+        })
+        
+        if (response.ok) {
+            success = true
+            setTimeout(() => {
+                success = false
+            }, 3000)
+        }
+    }
 </script>
 
 <Layout>
     <div class="form-container">
-        <form>
+        <form on:submit|preventDefault={handleRegister}>
             <input
                 class="input"
                 type="text"
@@ -42,17 +74,31 @@
                 type="password"
                 placeholder="Password"
                 bind:value={form.password}
-                on:change={verifyFormComplete}
+                on:change={verifyPassword}
             />
             <input
                 class="input"
                 type="password"
                 placeholder="Confirm Password"
                 bind:value={form.confirmPassword}
-                on:change={verifyFormComplete}
+                on:change={verifyPassword}
             />
+            <div class="form-bottom">
+                <Button
+                    variant={'outlined'}
+                    disabled={!enabled}
+                    onSubmit={handleRegister}
+                >
+                    Register
+                </Button>
+                {#if passwordError}
+                    <p class="error">Passwords do not match</p>
+                {/if}
+                {#if success}
+                    <p class="success">User created successfully!</p>
+                {/if}
+            </div>
         </form>
-        <Button variant={'outlined'} disabled={!enabled}>Register</Button>
     </div>
 </Layout>
 
@@ -74,5 +120,20 @@
         border-radius: 5px;
         background-color: rgb(28, 24, 36);
         color: #fff;
+    }
+
+    .form-bottom {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .error {
+        color: rgb(221, 63, 63);
+    }
+
+    .success {
+        color: rgb(17, 139, 97);
     }
 </style>
